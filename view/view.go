@@ -3,7 +3,6 @@ package view
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -147,14 +146,8 @@ func viewLog(node *tview.TreeNode, textView *tview.TextView) {
 		return
 	}
 	var text string
-	var runAt time.Time
 	events := getTestEvent(node)
 	for _, event := range events {
 		text += event.Output
-
-		if event.Action == collector.ActionRun {
-			runAt = event.Time
-		}
 	}
-	textView.SetText(text + " -> " + runAt.Format(time.DateTime))
 }
