@@ -45,7 +45,7 @@ func UnmarshalTestEvent(b []byte) (TestEvent, error) {
 	return te, nil
 }
 
-func ReadLogStdout(scanner *bufio.Scanner, eventChan chan<- TestEvent, doneChan chan<- struct{}) {
+func ReadLogStdin(scanner *bufio.Scanner, eventChan chan<- TestEvent, doneChan chan<- struct{}) {
 	defer close(doneChan)
 
 	for scanner.Scan() {
@@ -55,5 +55,11 @@ func ReadLogStdout(scanner *bufio.Scanner, eventChan chan<- TestEvent, doneChan 
 			continue
 		}
 		eventChan <- te
+	}
+
+	if err := scanner.Err(); err == nil {
+		close(doneChan)
+	} else {
+		panic(err)
 	}
 }

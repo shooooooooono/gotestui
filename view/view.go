@@ -33,15 +33,13 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 		return event
 	})
 
-	// テスト結果のリストビューを作成
 	list := tview.NewTreeView()
 	root := tview.NewTreeNode(".")
 	list.SetRoot(root).SetCurrentNode(root)
 
 	testCases := make(TestCaseMap)
-	nodeMap := make(map[string]*tview.TreeNode) // ノードの参照を保持
+	nodeMap := make(map[string]*tview.TreeNode)
 
-	// Outputを表示
 	textView := tview.NewTextView().
 		SetDynamicColors(true).
 		SetRegions(true).

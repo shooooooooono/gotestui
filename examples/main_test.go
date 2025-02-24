@@ -1,4 +1,4 @@
-package example
+package examples
 
 import (
 	"testing"
@@ -44,15 +44,3 @@ func TestExample(t *testing.T) {
 		})
 	})
 }
-
-// {
-//   "Time": "2025-02-08T19:06:48.770859257+09:00",
-//   "Action": "start",
-//   "Package": "github.com/shooooooooono/gotestui/example"
-// }
-// {
-//   "Time": "2025-02-08T19:06:48.773041675+09:00",
-//   "Action": "run",
-//   "Package": "github.com/shooooooooono/gotestui/example",
-//   "Test": "TestExample"
-// }
