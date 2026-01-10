@@ -6,10 +6,10 @@ import (
 )
 
 func TestExample(t *testing.T) {
-	t.Run("test", func(t *testing.T) {
+	t.Run("test1", func(t *testing.T) {
 		t.Log("aaaaa")
 	})
-	t.Run("test", func(t *testing.T) {
+	t.Run("test2", func(t *testing.T) {
 		t.Log("aaaaa")
 	})
 	t.Run("example test 01", func(t *testing.T) {

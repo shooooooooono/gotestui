@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 
 	"github.com/shooooooooono/gotestui/collector"
@@ -18,6 +19,7 @@ func main() {
 		if fi, err := os.Stdin.Stat(); err == nil && (fi.Mode()&os.ModeCharDevice) == 0 {
 			collector.ReadLogStdin(stdinScanner, eventChan, doneChan)
 		} else {
+			fmt.Fprintln(os.Stderr, "Error: No piped input detected. Usage: go test -json ./... | gotestui")
 			close(doneChan)
 		}
 	}()
