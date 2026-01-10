@@ -150,4 +150,5 @@ func viewLog(node *tview.TreeNode, textView *tview.TextView) {
 	for _, event := range events {
 		text += event.Output
 	}
+	textView.SetText(text)
 }

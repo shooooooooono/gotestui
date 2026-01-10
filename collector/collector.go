@@ -57,9 +57,7 @@ func ReadLogStdin(scanner *bufio.Scanner, eventChan chan<- TestEvent, doneChan c
 		eventChan <- te
 	}
 
-	if err := scanner.Err(); err == nil {
-		close(doneChan)
-	} else {
+	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
 }
