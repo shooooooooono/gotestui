@@ -105,29 +105,44 @@ func updateNode(root *tview.TreeNode, nodeMap map[string]*tview.TreeNode, testNa
 		parent = node
 	}
 
-	statusIcon := "-"
+	statusIcon := "⧗"
 	color := tcell.ColorDefault
+	var elapsed float64
+
 	for _, te := range events {
+		if te.Elapsed > 0 {
+			elapsed = te.Elapsed
+		}
 		switch te.Action {
 		case collector.ActionPass:
-			statusIcon = ""
+			statusIcon = "✓"
 			color = tcell.ColorGreen
 		case collector.ActionFail:
-			statusIcon = ""
+			statusIcon = "✗"
 			color = tcell.ColorRed
 		case collector.ActionRun:
-			statusIcon = ""
-			color = tcell.ColorGray
-		case collector.ActionSkip:
-			statusIcon = "󰼦"
-			color = tcell.ColorDefault
-		case collector.ActionStart:
+			statusIcon = "▶"
 			color = tcell.ColorYellow
+		case collector.ActionSkip:
+			statusIcon = "⏭"
+			color = tcell.ColorDarkCyan
+		case collector.ActionStart:
+			statusIcon = "⧗"
+			color = tcell.ColorGray
 		}
 	}
 
 	parent.SetReference(events)
-	text := fmt.Sprintf("%s - %s", statusIcon, parts[len(parts)-1])
+
+	// Format with icon, name, and elapsed time
+	testDisplayName := parts[len(parts)-1]
+	var text string
+	if elapsed > 0 {
+		text = fmt.Sprintf("%s %s [%.3fs]", statusIcon, testDisplayName, elapsed)
+	} else {
+		text = fmt.Sprintf("%s %s", statusIcon, testDisplayName)
+	}
+
 	parent.SetText(text).SetColor(color)
 }
 
