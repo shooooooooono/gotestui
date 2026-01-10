@@ -78,8 +78,10 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 					continue
 				}
 				testCases[te.Test] = append(testCases[te.Test], te)
+				testName := te.Test
+				events := testCases[te.Test]
 				app.QueueUpdateDraw(func() {
-					updateNode(root, nodeMap, te.Test, testCases[te.Test])
+					updateNode(root, nodeMap, testName, events)
 					viewLog(list.GetCurrentNode(), textView)
 				})
 				// map で集計したtestをrunAt 順に並び替える
