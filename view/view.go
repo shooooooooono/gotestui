@@ -34,7 +34,22 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 
 	list := tview.NewTreeView()
 	root := tview.NewTreeNode(".")
+	root.SetExpanded(true) // ルートをデフォルトで展開
 	list.SetRoot(root).SetCurrentNode(root)
+
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		currentNode := list.GetCurrentNode()
+		if currentNode == nil {
+			return event
+		}
+
+		// Toggle expand/collapse with Enter or Space
+		if event.Key() == tcell.KeyEnter || (event.Key() == tcell.KeyRune && event.Rune() == ' ') {
+			currentNode.SetExpanded(!currentNode.IsExpanded())
+			return nil
+		}
+		return event
+	})
 
 	testCases := make(TestCaseMap)
 	nodeMap := make(map[string]*tview.TreeNode)
@@ -45,7 +60,7 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 		SetWordWrap(true)
 
 	usageView := tview.NewTextView().
-		SetText("q: quit, hjkl/arrow: move").
+		SetText("q: quit, hjkl/arrow: move, Enter/Space: expand/collapse").
 		SetDynamicColors(true).
 		SetRegions(true).
 		SetWordWrap(false).
@@ -99,6 +114,7 @@ func updateNode(root *tview.TreeNode, nodeMap map[string]*tview.TreeNode, testNa
 		node, exists := nodeMap[path]
 		if !exists {
 			node = tview.NewTreeNode(part)
+			node.SetExpanded(true) // デフォルトで展開
 			nodeMap[path] = node
 			parent.AddChild(node)
 		}
