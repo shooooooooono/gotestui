@@ -127,7 +127,7 @@ func updateNode(root *tview.TreeNode, nodeMap map[string]*tview.TreeNode, testNa
 	}
 
 	parent.SetReference(events)
-	text := fmt.Sprintf("%s - %s", statusIcon, testName)
+	text := fmt.Sprintf("%s - %s", statusIcon, parts[len(parts)-1])
 	parent.SetText(text).SetColor(color)
 }
 
