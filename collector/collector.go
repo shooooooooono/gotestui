@@ -3,6 +3,8 @@ package collector
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
+	"os"
 	"time"
 )
 
@@ -52,14 +54,13 @@ func ReadLogStdin(scanner *bufio.Scanner, eventChan chan<- TestEvent, doneChan c
 		line := scanner.Bytes()
 		te, err := UnmarshalTestEvent(line)
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: Failed to parse JSON: %v (line: %s)\n", err, string(line))
 			continue
 		}
 		eventChan <- te
 	}
 
-	if err := scanner.Err(); err == nil {
-		close(doneChan)
-	} else {
+	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
 }

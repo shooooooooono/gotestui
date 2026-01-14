@@ -34,7 +34,22 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 
 	list := tview.NewTreeView()
 	root := tview.NewTreeNode(".")
+	root.SetExpanded(true) // ルートをデフォルトで展開
 	list.SetRoot(root).SetCurrentNode(root)
+
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		currentNode := list.GetCurrentNode()
+		if currentNode == nil {
+			return event
+		}
+
+		// Toggle expand/collapse with Enter or Space
+		if event.Key() == tcell.KeyEnter || (event.Key() == tcell.KeyRune && event.Rune() == ' ') {
+			currentNode.SetExpanded(!currentNode.IsExpanded())
+			return nil
+		}
+		return event
+	})
 
 	testCases := make(TestCaseMap)
 	nodeMap := make(map[string]*tview.TreeNode)
@@ -45,7 +60,7 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 		SetWordWrap(true)
 
 	usageView := tview.NewTextView().
-		SetText("q: quit, hjkl/arrow: move").
+		SetText("q: quit, hjkl/arrow: move, Enter/Space: expand/collapse").
 		SetDynamicColors(true).
 		SetRegions(true).
 		SetWordWrap(false).
@@ -63,8 +78,10 @@ func CreateApplication(eventChan <-chan collector.TestEvent, doneChan <-chan str
 					continue
 				}
 				testCases[te.Test] = append(testCases[te.Test], te)
+				testName := te.Test
+				events := testCases[te.Test]
 				app.QueueUpdateDraw(func() {
-					updateNode(root, nodeMap, te.Test, testCases[te.Test])
+					updateNode(root, nodeMap, testName, events)
 					viewLog(list.GetCurrentNode(), textView)
 				})
 				// map で集計したtestをrunAt 順に並び替える
@@ -99,35 +116,51 @@ func updateNode(root *tview.TreeNode, nodeMap map[string]*tview.TreeNode, testNa
 		node, exists := nodeMap[path]
 		if !exists {
 			node = tview.NewTreeNode(part)
+			node.SetExpanded(true) // デフォルトで展開
 			nodeMap[path] = node
 			parent.AddChild(node)
 		}
 		parent = node
 	}
 
-	statusIcon := "-"
+	statusIcon := "⧗"
 	color := tcell.ColorDefault
+	var elapsed float64
+
 	for _, te := range events {
+		if te.Elapsed > 0 {
+			elapsed = te.Elapsed
+		}
 		switch te.Action {
 		case collector.ActionPass:
-			statusIcon = ""
+			statusIcon = "✓"
 			color = tcell.ColorGreen
 		case collector.ActionFail:
-			statusIcon = ""
+			statusIcon = "✗"
 			color = tcell.ColorRed
 		case collector.ActionRun:
-			statusIcon = ""
-			color = tcell.ColorGray
-		case collector.ActionSkip:
-			statusIcon = "󰼦"
-			color = tcell.ColorDefault
-		case collector.ActionStart:
+			statusIcon = "▶"
 			color = tcell.ColorYellow
+		case collector.ActionSkip:
+			statusIcon = "⏭"
+			color = tcell.ColorDarkCyan
+		case collector.ActionStart:
+			statusIcon = "⧗"
+			color = tcell.ColorGray
 		}
 	}
 
 	parent.SetReference(events)
-	text := fmt.Sprintf("%s - %s", statusIcon, testName)
+
+	// Format with icon, name, and elapsed time
+	testDisplayName := parts[len(parts)-1]
+	var text string
+	if elapsed > 0 {
+		text = fmt.Sprintf("%s %s [%.3fs]", statusIcon, testDisplayName, elapsed)
+	} else {
+		text = fmt.Sprintf("%s %s", statusIcon, testDisplayName)
+	}
+
 	parent.SetText(text).SetColor(color)
 }
 
@@ -150,4 +183,5 @@ func viewLog(node *tview.TreeNode, textView *tview.TextView) {
 	for _, event := range events {
 		text += event.Output
 	}
+	textView.SetText(text)
 }
